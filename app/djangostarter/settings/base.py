@@ -27,16 +27,55 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
-# Application definition
-
-INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
+# ----------------------------
+# Django core applications
+# ----------------------------
+DJANGO_APPS = [
+    "django.contrib.admin",          # Django admin interface for managing data
+    "django.contrib.auth",           # Authentication system (users, permissions, passwords)
+    "django.contrib.contenttypes",   # Generic relations and permission framework backbone
+    "django.contrib.sessions",       # Session management (server-side sessions)
+    "django.contrib.messages",       # Flash messages framework (success, error, info)
+    "django.contrib.staticfiles",    # Static file handling (CSS, JS, images)
 ]
+
+# ----------------------------
+# Local project applications
+# ----------------------------
+LOCAL_APPS = [
+    "apps.users.apps.UsersConfig",   # Custom user app (auth extensions, profiles, roles)
+    "apps.core.apps.CoreConfig",     # Core/shared logic (utils, base models, constants)
+]
+
+# ----------------------------
+# Third-party applications
+# ----------------------------
+THIRD_PARTY_APPS = [
+    "modeltranslation",              # Multilingual model fields (i18n at database level)
+    "autoslug",                      # Automatic, SEO-friendly slug generation
+    "django_extensions",             # Developer utilities (shell_plus, graph_models, etc.)
+    "django_elasticsearch_dsl",      # Elasticsearch integration via Django ORM signals
+
+    "allauth",                       # Complete authentication framework
+    "allauth.socialaccount",         # Social login support (OAuth plumbing)
+    "allauth.socialaccount.providers.google",  # Google OAuth provider
+    "allauth.account",               # Email-based auth, registration, verification
+
+    "corsheaders",                   # Cross-Origin Resource Sharing (API access from browsers)
+    "rest_framework",                # Django REST Framework (APIs, serializers, views)
+    "rest_framework_simplejwt",      # JWT authentication for DRF (stateless auth)
+    "djoser",                        # REST endpoints for auth (login, register, reset password)
+
+    "formtools",                     # Advanced form workflows (wizards, multi-step forms)
+    "djcelery_email",                # Async email sending via Celery
+    "drf_spectacular",               # OpenAPI 3 schema generation (Swagger / Redoc)
+]
+
+# ----------------------------
+# Final installed apps
+# ----------------------------
+INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
