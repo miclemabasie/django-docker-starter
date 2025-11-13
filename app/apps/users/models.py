@@ -1,21 +1,24 @@
 import uuid
-from django.db import models
-from django.contrib.auth.models import (
-    AbstractBaseUser,
-    PermissionsMixin,
-    Group,
-    Permission,
-)
-from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
-from phonenumber_field.modelfields import PhoneNumberField
-from django_countries.fields import CountryField
-from apps.core.models import Gender, TimeStampedUUIDModel
-from .managers import CustomUserManager
 
 # Import for Google Maps API
 from django.conf import settings
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    Group,
+    Permission,
+    PermissionsMixin,
+)
+from django.db import models
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
 import requests
+from django_countries.fields import CountryField
+from phonenumber_field.modelfields import PhoneNumberField
+
+from apps.core.models import Gender, TimeStampedUUIDModel
+
+from .managers import CustomUserManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):

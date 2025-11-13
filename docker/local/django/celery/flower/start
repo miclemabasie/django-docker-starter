@@ -8,7 +8,7 @@ set -o nounset
 
 
 worker_reader() {
-    celery -A dajngostarter inspect ping
+    celery -A djangostarter inspect ping
 }
 
 until worker_reader; do
@@ -20,5 +20,5 @@ done
 
 exec "$@"
 
-celery -A dajngostarter flower \
+celery -A djangostarter flower \
     --broker="${CELERY_BROKER_URL}" \

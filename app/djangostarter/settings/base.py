@@ -1,17 +1,18 @@
-from pathlib import Path
-import environ
 import logging
-from datetime import timedelta
 import logging.config
+from datetime import timedelta
+from pathlib import Path
+
 from django.utils.log import DEFAULT_LOGGING
 from django.utils.translation import gettext_lazy as _
 
-from pathlib import Path
+import environ
 
 env = environ.Env(DEBUG=(bool, False))
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 environ.Env.read_env(BASE_DIR / ".env")
+
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-t+4t*bp23a(n1o8##%7fqki&^+rf!4o031e4@cjt^(xgb&__31"
@@ -146,9 +147,70 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/staticfiles/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
+MEDIA_URL = "/mediafiles/"
+MEDIA_ROOT = BASE_DIR / "mediafiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Logger configuration
+LOG_FILE_NAME = "dajngo.log"
+LOG_LEVEL = "INFO"
+
+logging.config.dictConfig(
+    {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "console": {
+                "format": "%(asctime)s %(name)-30s %(levelname)-8s %(message)s %(context)s"
+            },
+            "file": {
+                "format": "%(asctime)s %(name)-30s %(levelname)-8s %(message)s %(context)s"
+            },
+            "django.server": DEFAULT_LOGGING["formatters"]["django.server"],
+        },
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "formatter": "console",
+            },
+            "file": {
+                "level": LOG_LEVEL,
+                "class": "logging.FileHandler",
+                "formatter": "file",
+                "filename": f"logs/{LOG_FILE_NAME}",
+            },
+            "django.server": DEFAULT_LOGGING["handlers"]["django.server"],
+        },
+        "loggers": {
+            "": {
+                "level": LOG_LEVEL,
+                "handlers": ["console", "file"],
+                "propagate": False,
+            },
+            "apps": {
+                "level": LOG_LEVEL,
+                "handlers": ["console", "file"],
+                "propagate": False,
+            },
+            "django.server": DEFAULT_LOGGING["loggers"]["django.server"],
+            "channels": {
+                "level": "DEBUG",  # Set to DEBUG for detailed Channels logging
+                "handlers": ["console", "file"],
+                "propagate": False,
+            },
+            "channels.layers": {
+                "level": "DEBUG",  # Specific logger for Channels layers
+                "handlers": ["console", "file"],
+                "propagate": False,
+            },
+        },
+    }
+)
