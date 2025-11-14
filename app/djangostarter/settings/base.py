@@ -1,77 +1,82 @@
+"""
+Django Base Settings File
+-------------------------
+This file contains the core Django settings for the project, including:
+
+- Installed applications (Django, third-party, and local apps)
+- Middleware
+- Database and cache configuration
+- Authentication, REST framework, JWT, Djoser
+- Static & media files
+- Channels (WebSocket)
+- Logger configuration
+"""
+
 import logging
 import logging.config
 from datetime import timedelta
 from pathlib import Path
 
-from django.utils.log import DEFAULT_LOGGING
-from django.utils.translation import gettext_lazy as _
-
 import environ
+from django.utils.log import DEFAULT_LOGGING
 
+import helpers.cloudflare.settings  # Cloudflare storage integration
+
+# -----------------------------
+# Environment configuration
+# -----------------------------
 env = environ.Env(DEBUG=(bool, False))
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 environ.Env.read_env(BASE_DIR / ".env")
 
+# -----------------------------
+# Security
+# -----------------------------
+SECRET_KEY = env(
+    "SECRET_KEY", default="django-insecure-t+4t*bp23a-n1o8##..."
+)  # Keep secret in production
+DEBUG = env("DEBUG", default=True)
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-t+4t*bp23a(n1o8##%7fqki&^+rf!4o031e4@cjt^(xgb&__31"
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
-
-# ----------------------------
-# Django core applications
-# ----------------------------
+# -----------------------------
+# Applications
+# -----------------------------
 DJANGO_APPS = [
-    "django.contrib.admin",  # Django admin interface for managing data
-    "django.contrib.auth",  # Authentication system (users, permissions, passwords)
-    "django.contrib.contenttypes",  # Generic relations and permission framework backbone
-    "django.contrib.sessions",  # Session management (server-side sessions)
-    "django.contrib.messages",  # Flash messages framework (success, error, info)
-    "django.contrib.staticfiles",  # Static file handling (CSS, JS, images)
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
 ]
 
-# ----------------------------
-# Local project applications
-# ----------------------------
 LOCAL_APPS = [
-    "apps.users.apps.UsersConfig",  # Custom user app (auth extensions, profiles, roles)
-    "apps.core.apps.CoreConfig",  # Core/shared logic (utils, base models, constants)
+    "apps.users.apps.UsersConfig",
+    "apps.core.apps.CoreConfig",
 ]
 
-# ----------------------------
-# Third-party applications
-# ----------------------------
 THIRD_PARTY_APPS = [
-    # "modeltranslation",              # Multilingual model fields (i18n at database level)
-    # "autoslug",                      # Automatic, SEO-friendly slug generation
-    # "django_extensions",             # Developer utilities (shell_plus, graph_models, etc.)
-    # "django_elasticsearch_dsl",      # Elasticsearch integration via Django ORM signals
-    # "allauth",                       # Complete authentication framework
-    # "allauth.socialaccount",         # Social login support (OAuth plumbing)
-    # "allauth.socialaccount.providers.google",  # Google OAuth provider
-    # "allauth.account",               # Email-based auth, registration, verification
-    # "corsheaders",                   # Cross-Origin Resource Sharing (API access from browsers)
-    # "rest_framework",                # Django REST Framework (APIs, serializers, views)
-    # "rest_framework_simplejwt",      # JWT authentication for DRF (stateless auth)
-    # "djoser",                        # REST endpoints for auth (login, register, reset password)
-    # "formtools",                     # Advanced form workflows (wizards, multi-step forms)
-    # "djcelery_email",                # Async email sending via Celery
-    # "drf_spectacular",               # OpenAPI 3 schema generation (Swagger / Redoc)
+    "modeltranslation",
+    "autoslug",
+    "django_extensions",
+    "django_elasticsearch_dsl",
+    "allauth",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "allauth.account",
+    "corsheaders",
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "djoser",
+    "djcelery_email",
+    "drf_spectacular",
 ]
 
-# ----------------------------
-# Final installed apps
-# ----------------------------
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
 
-
-AUTH_USER_MODEL = "users.User"
-
+# -----------------------------
+# Middleware
+# -----------------------------
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -80,14 +85,18 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "djangostarter.urls"
 
+# -----------------------------
+# Templates
+# -----------------------------
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -101,10 +110,32 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "djangostarter.wsgi.application"
 
+# -----------------------------
+# Channels (WebSocket)
+# -----------------------------
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],
+        },
+    },
+}
 
+# -----------------------------
+# Storage
+# -----------------------------
+STORAGES = {
+    "default": {
+        "BACKEND": "helpers.cloudflare.storages.MediaFileStorage",
+        "OPTIONS": helpers.cloudflare.settings.CLOUDFLARE_R2_CONFIG_OPTIONS,
+    },
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
+
+# -----------------------------
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# -----------------------------
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -112,41 +143,141 @@ DATABASES = {
     }
 }
 
+# -----------------------------
+# Elasticsearch
+# -----------------------------
+ELASTICSEARCH_DSL = {"default": {"hosts": "http://elasticsearch:9200"}}
 
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+# -----------------------------
+# Email & CORS
+# -----------------------------
+DEFAULT_FROM_EMAIL = "example@gmail.com"
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    "content-type",
+    "authorization",
+    "x-requested-with",
+    "accept",
+    "origin",
+]
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# -----------------------------
+# Caches
+# -----------------------------
+CACHES = {
+    "default": {
+        "BACKEND": env("CACHE_BACKEND"),
+        "LOCATION": env("CACHE_LOCATION"),
+        "OPTIONS": {"CLIENT_CLASS": env("OPTIONS_CLIENT_CLASS")},
+    }
+}
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://178.79.157.38",
+    "http://localhost:8080",
+    "https://leading-kite-wise.ngrok-free.app",
 ]
 
+SITE_ID = 1
 
+# -----------------------------
+# Authentication & Accounts
+# -----------------------------
+AUTH_USER_MODEL = "users.User"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_VERIFICATION = "optional"
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+# -----------------------------
+# Password validation
+# -----------------------------
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+
+# -----------------------------
+# Django REST Framework
+# -----------------------------
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
+    "NON_FIELD_ERRORS_KEY": "error",
+    "EXCEPTION_HANDLER": "rest_framework.views.exception_handler",
+}
+
+SIMPLE_JWT = {
+    "AUTH_HEADER_TYPES": ("Bearer", "JWT"),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=10),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=20),
+    "SIGNING_KEY": env("SIGNING_KEY"),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+}
+
+# -----------------------------
+# Djoser
+# -----------------------------
+DJOSER = {
+    "LOGIN_FIELD": "email",
+    "USER_CREATE_PASSWORD_RETYPE": True,
+    "SEND_CONFIRMATION_EMAIL": True,
+    "ACTIVATION_URL": "activate/{uid}/{token}",
+    "SERIALIZERS": {
+        "user_create": "apps.users.api.serializers.CreateUserSerializer",
+        "user_create_password_retype": "apps.users.api.serializers.CreateUserSerializer",
+        "user": "apps.users.api.serializers.UserSerializer",
+        "current_user": "apps.users.api.serializers.UserSerializer",
+        "user_delete": "djoser.serializers.UserDeleteSerializer",
+    },
+    "PERMISSIONS": {
+        "user_create": ["rest_framework.permissions.AllowAny"],
+        "user": ["rest_framework.permissions.IsAuthenticated"],
+        "user_delete": ["rest_framework.permissions.IsAuthenticated"],
+        "current_user": ["rest_framework.permissions.IsAuthenticated"],
+        "activation": ["rest_framework.permissions.AllowAny"],
+        "password_reset": ["rest_framework.permissions.AllowAny"],
+        "password_reset_confirm": ["rest_framework.permissions.AllowAny"],
+        "password_change": ["rest_framework.permissions.IsAuthenticated"],
+        "password_change_confirm": ["rest_framework.permissions.IsAuthenticated"],
+        "user_list": ["rest_framework.permissions.IsAuthenticated"],
+    },
+    "HIDE_USERS": False,
+    "PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND": True,
+}
+
+# -----------------------------
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
+# -----------------------------
 LANGUAGE_CODE = "en-us"
-
-TIME_ZONE = "UTC"
-
+TIME_ZONE = "Africa/Douala"
 USE_I18N = True
-
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# -----------------------------
+# Static & Media
+# -----------------------------
 STATIC_URL = "/staticfiles/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
@@ -154,38 +285,37 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_URL = "/mediafiles/"
 MEDIA_ROOT = BASE_DIR / "mediafiles"
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# -----------------------------
 # Logger configuration
-LOG_FILE_NAME = "dajngo.log"
-LOG_LEVEL = "INFO"
+# -----------------------------
+LOG_FILE_NAME = "django.log"
+LOG_LEVEL = env("LOG_LEVEL", default="INFO")
 
 logging.config.dictConfig(
     {
         "version": 1,
         "disable_existing_loggers": False,
         "formatters": {
+            # Console formatter with safe context
             "console": {
-                "format": "%(asctime)s %(name)-30s %(levelname)-8s %(message)s %(context)s"
+                "format": "%(asctime)s %(name)-30s %(levelname)-8s %(message)s %(context)s",
+                "class": "apps.core.logger_formatter.SafeContextFormatter",
             },
             "file": {
-                "format": "%(asctime)s %(name)-30s %(levelname)-8s %(message)s %(context)s"
+                "format": "%(asctime)s %(name)-30s %(levelname)-8s %(message)s %(context)s",
+                "class": "apps.core.logger_formatter.SafeContextFormatter",
             },
             "django.server": DEFAULT_LOGGING["formatters"]["django.server"],
         },
         "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "formatter": "console",
-            },
+            "console": {"class": "logging.StreamHandler", "formatter": "console"},
             "file": {
                 "level": LOG_LEVEL,
                 "class": "logging.FileHandler",
                 "formatter": "file",
-                "filename": f"logs/{LOG_FILE_NAME}",
+                "filename": BASE_DIR / "logs" / LOG_FILE_NAME,
             },
             "django.server": DEFAULT_LOGGING["handlers"]["django.server"],
         },
@@ -202,12 +332,12 @@ logging.config.dictConfig(
             },
             "django.server": DEFAULT_LOGGING["loggers"]["django.server"],
             "channels": {
-                "level": "DEBUG",  # Set to DEBUG for detailed Channels logging
+                "level": "DEBUG",
                 "handlers": ["console", "file"],
                 "propagate": False,
             },
             "channels.layers": {
-                "level": "DEBUG",  # Specific logger for Channels layers
+                "level": "DEBUG",
                 "handlers": ["console", "file"],
                 "propagate": False,
             },
