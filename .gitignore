@@ -19,6 +19,8 @@ lib64/
 parts/
 sdist/
 var/
+staticfiles/
+mediafiles/
 wheels/
 share/python-wheels/
 *.egg-info/
@@ -32,6 +34,8 @@ MANIFEST
 *.manifest
 *.spec
 commands.txt
+program.py
+project_code.md
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt

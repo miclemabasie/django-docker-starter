@@ -4,9 +4,9 @@ class LoggingConstants:
     LOG_FILE_NAME = "django.log"
 
 
-class AppContants:
+class AppConstants:
     USER_EMAIL_VALIDATION_ERROR_MESSAGE = "You must provide a valid email address"
-    NO_USERNAME_ERROR_MESSAGE = "You must provide a vaalide username"
+    NO_USERNAME_ERROR_MESSAGE = "You must provide a valid username"
     NO_FIRSTNAME_ERROR_MESSAGE = "User must provide a first name"
     NO_LASTNAME_ERROR_MESSAGE = "User must provide a last name"
     NO_PASSWORD_ERROR_MESSAGE = "You must provide a valid password"

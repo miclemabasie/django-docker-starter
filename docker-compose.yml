@@ -7,8 +7,8 @@ services:
         command: /start
         volumes:
             - .:/app
-            - static_volume:/app/staticfiles
-            - media_volume:/app/mediafiles
+            - myapp_djangostarter_static_volume:/app/staticfiles
+            - myapp_djangostarter_media_volume:/app/mediafiles
         
         env_file:
             - app/.env
@@ -25,7 +25,7 @@ services:
         ports:
             - "5432:5432"
         volumes:
-            - postgres_data:/var/lib/postgresql/data/
+            - myapp_djangostarter_postgres_data:/var/lib/postgresql/data/
         env_file:
             - app/.env
 
@@ -34,7 +34,7 @@ services:
 
     redis:
         image: redis:6.0.9-alpine
-        container_name: redis
+        container_name: myapp-redis
         ports:
         - "6379:6379"
         networks:
@@ -92,7 +92,7 @@ services:
     elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
         volumes:
-            - elastic_data:/usr/share/elasticsearch/data
+            - myapp_djangostarter_elastic_data:/usr/share/elasticsearch/data
         environment:
             - discovery.type=single-node
             - xpack.security.enabled=false
@@ -109,8 +109,8 @@ networks:
         driver: bridge
 
 volumes:
-    postgres_data:
-    static_volume:
-    media_volume:
-    elastic_data:       
+    myapp_djangostarter_postgres_data:
+    myapp_djangostarter_static_volume:
+    myapp_djangostarter_media_volume:
+    myapp_djangostarter_elastic_data:       
 

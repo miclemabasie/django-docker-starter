@@ -1,10 +1,13 @@
-from django.urls import path
-from .controllers import GetProfileAPIView, profile_update, update_user_role
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+from apps.users.api.views import UserViewSet
 
 app_name = "users_api"
 
+router = DefaultRouter()
+router.register(r"users", UserViewSet, basename="user")
+
 urlpatterns = [
-    path("me/", GetProfileAPIView.as_view(), name="my_profile"),
-    path("update/", profile_update, name="update_profile"),
-    path("update-role/", update_user_role, name="update_user_role"),
+    path("", include(router.urls)),
 ]

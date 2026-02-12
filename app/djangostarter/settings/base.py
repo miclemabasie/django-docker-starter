@@ -53,6 +53,7 @@ DJANGO_APPS = [
 LOCAL_APPS = [
     "apps.users.apps.UsersConfig",
     "apps.core.apps.CoreConfig",
+    "apps.notifications.apps.NotificationsConfig",
 ]
 
 THIRD_PARTY_APPS = [
@@ -125,13 +126,13 @@ CHANNEL_LAYERS = {
 # -----------------------------
 # Storage
 # -----------------------------
-STORAGES = {
-    "default": {
-        "BACKEND": "helpers.cloudflare.storages.MediaFileStorage",
-        "OPTIONS": helpers.cloudflare.settings.CLOUDFLARE_R2_CONFIG_OPTIONS,
-    },
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
+# STORAGES = {
+#     "default": {
+#         "BACKEND": "helpers.cloudflare.storages.MediaFileStorage",
+#         "OPTIONS": helpers.cloudflare.settings.CLOUDFLARE_R2_CONFIG_OPTIONS,
+#     },
+#     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+# }
 
 # -----------------------------
 # Database
@@ -176,11 +177,7 @@ CACHES = {
     }
 }
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://178.79.157.38",
-    "http://localhost:8080",
-    "https://leading-kite-wise.ngrok-free.app",
-]
+CSRF_TRUSTED_ORIGINS = ["http://localhost", "http://127.0.0.1"]
 
 SITE_ID = 1
 
@@ -242,11 +239,14 @@ SIMPLE_JWT = {
 DJOSER = {
     "LOGIN_FIELD": "email",
     "USER_CREATE_PASSWORD_RETYPE": True,
+    "SEND_ACTIVATION_EMAIL": True,
     "SEND_CONFIRMATION_EMAIL": True,
     "ACTIVATION_URL": "activate/{uid}/{token}",
+    "PASSWORD_RESET_CONFIRM_URL": "password-reset/{uid}/{token}",
+    "USERNAME_RESET_CONFIRM_URL": "username-reset/{uid}/{token}",
     "SERIALIZERS": {
-        "user_create": "apps.users.api.serializers.CreateUserSerializer",
-        "user_create_password_retype": "apps.users.api.serializers.CreateUserSerializer",
+        "user_create": "apps.users.api.serializers.UserCreateSerializer",
+        "user_create_password_retype": "apps.users.api.serializers.UserCreateSerializer",
         "user": "apps.users.api.serializers.UserSerializer",
         "current_user": "apps.users.api.serializers.UserSerializer",
         "user_delete": "djoser.serializers.UserDeleteSerializer",
@@ -266,7 +266,6 @@ DJOSER = {
     "HIDE_USERS": False,
     "PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND": True,
 }
-
 # -----------------------------
 # Internationalization
 # -----------------------------
@@ -287,6 +286,18 @@ MEDIA_ROOT = BASE_DIR / "mediafiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+
+# --- Notifications ---
+SITE_NAME = env("SITE_NAME", default="Django Starter")
+EMAIL_BACKEND = env("EMAIL_BACKEND", default="database")  # 'database' or 'smtp'
+
+# Fallback SMTP settings (used only if EMAIL_BACKEND='smtp' or no active EmailConfiguration)
+EMAIL_HOST = env("EMAIL_HOST", default="smtp.gmail.com")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@example.com")
 # -----------------------------
 # Logger configuration
 # -----------------------------
