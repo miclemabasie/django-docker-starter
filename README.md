@@ -1,4 +1,3 @@
-```markdown
 # 🚀 Django Starter – Production‑Ready Boilerplate
 
 [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://python.org)
@@ -7,12 +6,17 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg)](https://postgresql.org)
 [![Docker](https://img.shields.io/badge/Docker-✓-2496ED.svg)](https://docker.com)
 [![Celery](https://img.shields.io/badge/Celery-5.4-37814A.svg)](https://docs.celeryq.dev/)
+![Nginx](https://img.shields.io/badge/Server-Nginx-009639?logo=nginx&logoColor=white)
+![Redis](https://img.shields.io/badge/Broker-Redis-DC382D?logo=redis&logoColor=white)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Elasticsearch](https://img.shields.io/badge/Search-Elasticsearch-005571?logo=elasticsearch&logoColor=white)
+
+
 
 A **complete, production‑ready Django starter project** with everything you need to build scalable web applications and REST APIs.  
 **Zero boilerplate** – focus on your business logic, not on repetitive setup.
 
----
+
 
 ## ✨ Features
 
@@ -32,7 +36,6 @@ A **complete, production‑ready Django starter project** with everything you ne
 - ✅ **Code Quality** – Black, isort, flake8, pytest with coverage
 - ✅ **OpenAPI Schema** – auto‑generated via `drf-spectacular`
 
----
 
 ## 📦 Quick Start (5 Minutes)
 
