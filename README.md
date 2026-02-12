@@ -420,7 +420,7 @@ See the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🙏 Acknowledgements
+## Acknowledgements
 
 Built with the best tools in the Python ecosystem.  
 Special thanks to the Django, DRF, Celery, and Docker communities.
